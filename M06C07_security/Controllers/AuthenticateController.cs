@@ -4,12 +4,17 @@ using M06C07_security.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-
+using EntityFrameworkCore.RawSQLExtensions.Extensions;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.Data;
+using Microsoft.AspNetCore.Cors;
 namespace M06C07_security.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors("res")]
     public class AuthenticateController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -37,7 +42,7 @@ namespace M06C07_security.Controllers
                 var isExist = await _userManager.FindByEmailAsync(model.Email);
                 if (isExist != null)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
+                    return StatusCode(StatusCodes.Status500InternalServerError,"Email exist, try different email");
                 }
                 var user = new ApplicationUser
                 {
@@ -92,6 +97,10 @@ namespace M06C07_security.Controllers
                 {
                     var role = _userManager.GetRolesAsync(existUser).Result.FirstOrDefault();
                     var u = await _userManager.CheckPasswordAsync(existUser, loginVM.Password);
+                   if(u)
+                    {
+
+                   
                     var claims = new List<Claim> {
                         new Claim (ClaimTypes.Name,loginVM.UserName??""),
                         new Claim (ClaimTypes.Role,role??""),
@@ -131,9 +140,57 @@ namespace M06C07_security.Controllers
                     {
                         return Ok(new AuthenticatedResponse { Token = acctokens, RefreshToken = refreshToken, Role = role });
                     }
+               
+                
+                }
+
                 }
                 return Unauthorized(new { msg="Invalid user name or Password"});
             }
         }
+
+        [HttpGet("alluser")]
+        public    List<Vendor> GetAll()
+        {
+            return _context.Vendors.FromSqlRaw(" select * from vwUser").ToList();
+            
+        }
+        [HttpGet]
+        [Route("GetAllUsersWithRoles")]
+        public async Task<IActionResult> GetAllUsersWithRoles()
+        {
+            //string query = "SELECT r.Name as roleName, ur.roleId, u.Id as userId   FROM dbo.AspNetUserRoles AS ur INNER JOIN dbo.AspNetUsers AS u ON ur.UserId = u.Id INNER JOIN dbo.AspNetRoles AS r ON ur.RoleId = r.Id ";
+            string query = "allUser";
+            try
+            {
+                ICollection<object> usersWithRoles = new List<object>();
+                using (var command = _context.Database.GetDbConnection().CreateCommand())
+                {
+                    command.CommandText = query;
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    await _context.Database.OpenConnectionAsync();
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            usersWithRoles.Add(new
+                            {
+                                
+                                Name = reader.GetFieldValueAsync<string>(0).Result,
+                                userId = reader.GetFieldValueAsync<string>(1).Result,
+                                 
+                            });
+                        }
+                    }
+                }
+                return StatusCode(200, usersWithRoles); // Get all users   
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e);
+            }
+        } 
     }
 }
