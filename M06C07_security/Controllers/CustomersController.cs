@@ -1,4 +1,5 @@
 ﻿using M06C07_security.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ namespace M06C07_security.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [EnableCors("res")]
+    //[Authorize]
     public class CustomersController : ControllerBase
     {
         private readonly dbHealthContext _context;

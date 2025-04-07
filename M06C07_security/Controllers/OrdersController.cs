@@ -132,7 +132,7 @@ namespace M06C07_security.Controllers
                     }
                     _context.SaveChanges();
                     transaction.Commit();
-                    return Ok();
+                    return Ok(order);
                 }
                 catch (Exception ex)
                 {

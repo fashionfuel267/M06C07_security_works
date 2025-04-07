@@ -40,7 +40,8 @@ namespace M06C07_security.Models
     {
         public int ID { get; set; }
         public int OrderId { get; set; }
-        public long PrdID { get; set; }
+        [ForeignKey("Item")]
+        public int PrdID { get; set; }
         public int Qty { get; set; }
         public int Price { get; set; }
         public virtual Item? Item { get; set; }
@@ -53,7 +54,7 @@ namespace M06C07_security.Models
         {
             this.OrderItems = new HashSet<OrderItem>();
         }
-        public int OrderDt { get; set; }
+        
         public int OrderID { get; set; }
         [ForeignKey("Customer")]
         public int CusID { get; set; }
@@ -64,7 +65,7 @@ namespace M06C07_security.Models
         public string? Paymethod { get; set; }
         public virtual Customer? Customer { get; set; }
         [NotMapped]
-        public string DeletedOrderItemIDs { get; set; }
+        public string? DeletedOrderItemIDs { get; set; }
 
         public virtual ICollection<OrderItem>? OrderItems { get; set; }
 

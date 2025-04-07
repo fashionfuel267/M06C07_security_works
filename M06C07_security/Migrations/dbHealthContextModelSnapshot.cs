@@ -198,7 +198,6 @@ namespace M06C07_security.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Paymethod")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("TotalPrice")
@@ -219,14 +218,11 @@ namespace M06C07_security.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<long>("PrdID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("PrdID")
+                        .HasColumnType("int");
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
@@ -236,9 +232,9 @@ namespace M06C07_security.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ItemId");
-
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("PrdID");
 
                     b.ToTable("OrderItems");
                 });
@@ -414,15 +410,15 @@ namespace M06C07_security.Migrations
 
             modelBuilder.Entity("M06C07_security.Models.OrderItem", b =>
                 {
-                    b.HasOne("M06C07_security.Models.Item", "Item")
-                        .WithMany("OrderItems")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("M06C07_security.Models.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("M06C07_security.Models.Item", "Item")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("PrdID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
